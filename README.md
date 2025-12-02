@@ -11,6 +11,9 @@ Download the latest release for your platform:
 
 See [Releases](https://github.com/superness/superaxecoinwallet/releases) for downloads.
 
+<img width="1145" height="906" alt="image" src="https://github.com/user-attachments/assets/95847978-cb3b-4f87-b2cd-0ee0ed3917ad" />
+
+
 ## Features
 
 - Dashboard with balance, block height, and sync status
@@ -99,3 +102,4 @@ Output goes to `dist/` with platform-specific daemon binaries bundled.
 ## License
 
 MIT
+
