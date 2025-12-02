@@ -1953,8 +1953,8 @@ h3 {
   position: relative;
   background: var(--dark-1);
   border: var(--border-harsh);
-  padding: 3rem;
-  max-width: 500px;
+  padding: 2.5rem;
+  max-width: 460px;
   width: 90%;
   box-shadow:
     0 0 0 1px var(--red-dark),
@@ -2015,13 +2015,13 @@ h3 {
 /* Header section */
 .wallet-transition-header {
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.75rem;
 }
 
 .wallet-transition-icon {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 1.5rem;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
   background: var(--red-primary);
   border-radius: 50%;
   display: flex;
@@ -2047,30 +2047,30 @@ h3 {
 }
 
 .wallet-transition-icon svg {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   color: var(--white);
 }
 
 .wallet-transition-title {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 900;
   color: var(--white);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
   letter-spacing: -0.02em;
   text-transform: uppercase;
   text-shadow: none;
 }
 
 .wallet-transition-subtitle {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--white-50);
   font-weight: 400;
 }
 
 /* Progress section */
 .wallet-transition-progress {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .wallet-transition-steps {
@@ -2084,8 +2084,8 @@ h3 {
 .wallet-step {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem 0;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
   border-bottom: 1px solid var(--white-10);
   opacity: 0.4;
   transform: translateX(-10px);
@@ -2267,10 +2267,10 @@ h3 {
 /* Wallet info display */
 .wallet-transition-wallet-info {
   text-align: center;
-  padding: 1.5rem;
+  padding: 1rem;
   background: var(--black);
   border: var(--border-subtle);
-  margin-top: 1rem;
+  margin-top: 0.75rem;
 }
 
 .wallet-info-label {
@@ -2283,7 +2283,7 @@ h3 {
 }
 
 .wallet-info-name {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 900;
   color: var(--red-primary);
   font-family: var(--font-mono);
@@ -2293,10 +2293,10 @@ h3 {
 /* Error state */
 .wallet-transition-error {
   text-align: center;
-  padding: 1.5rem;
+  padding: 1.25rem;
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid var(--error);
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   animation: errorShake 0.5s ease;
 }
 
