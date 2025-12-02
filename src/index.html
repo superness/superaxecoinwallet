@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:;">
+  <title>SuperAxeCoin Wallet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Particle container hidden in new design -->
+  <div id="particles-container"></div>
+
+  <div class="app">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="logo">
+        <h1>SuperAxeCoin</h1>
+        <span class="version">Wallet v1.0.0</span>
+      </div>
+
+      <!-- Wallet Selector (Phase 6.1) -->
+      <div class="wallet-selector" id="walletSelector">
+        <label>Current Wallet</label>
+        <div class="wallet-select-row">
+          <select id="currentWallet">
+            <option value="default_wallet">default_wallet</option>
+          </select>
+          <button class="btn btn-small" id="createWalletBtn" title="Create New Wallet">+</button>
+        </div>
+      </div>
+
+      <ul class="nav-menu">
+        <li class="nav-item active" data-page="dashboard">
+          <span class="icon">&#9632;</span> Dashboard
+        </li>
+        <li class="nav-item" data-page="send">
+          <span class="icon">&#8593;</span> Send
+        </li>
+        <li class="nav-item" data-page="receive">
+          <span class="icon">&#8595;</span> Receive
+        </li>
+        <li class="nav-item" data-page="transactions">
+          <span class="icon">&#8644;</span> Transactions
+        </li>
+        <li class="nav-item" data-page="network">
+          <span class="icon">&#127760;</span> Network
+        </li>
+        <li class="nav-item" data-page="contacts">
+          <span class="icon">&#128100;</span> Contacts
+        </li>
+        <li class="nav-item" data-page="tools">
+          <span class="icon">&#128295;</span> Tools
+        </li>
+        <li class="nav-item" data-page="settings">
+          <span class="icon">&#9881;</span> Settings
+        </li>
+      </ul>
+      <div class="connection-status" id="connectionStatus">
+        <span class="status-dot disconnected"></span>
+        <span>Disconnected</span>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+      <!-- Dashboard Page -->
+      <div class="page active" id="page-dashboard">
+        <h2>Dashboard</h2>
+        <div class="stats-grid">
+          <div class="stat-card balance">
+            <h3>Balance</h3>
+            <p class="stat-value" id="balance">-- AXE</p>
+          </div>
+          <div class="stat-card">
+            <h3>Block Height</h3>
+            <p class="stat-value" id="blockHeight">--</p>
+          </div>
+          <div class="stat-card">
+            <h3>Connections</h3>
+            <p class="stat-value" id="connections">--</p>
+          </div>
+          <div class="stat-card">
+            <h3>Sync Status</h3>
+            <p class="stat-value" id="syncStatus">--</p>
+          </div>
+        </div>
+        <div class="recent-transactions">
+          <h3>Recent Transactions</h3>
+          <div class="tx-list" id="recentTxList">
+            <p class="empty-state">Loading transactions...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Send Page -->
+      <div class="page" id="page-send">
+        <h2>Send AXE</h2>
+        <form id="sendForm" class="form">
+          <div class="form-group">
+            <label for="sendAddress">Recipient Address</label>
+            <div class="input-with-button">
+              <input type="text" id="sendAddress" placeholder="Enter SuperAxeCoin address" required>
+              <button type="button" class="btn btn-small" id="pickContactBtn" title="Pick from Contacts">&#128100;</button>
+            </div>
+            <span class="validation-msg" id="addressValidation"></span>
+          </div>
+          <div class="form-group">
+            <label for="sendAmount">Amount (AXE)</label>
+            <input type="number" id="sendAmount" placeholder="0.00" step="0.00000001" min="0" required>
+          </div>
+          <div class="form-group">
+            <label>Available Balance</label>
+            <p class="available-balance" id="availableBalance">-- AXE</p>
+          </div>
+
+          <!-- Fee Estimation (Phase 4.1) -->
+          <div class="form-group fee-section">
+            <label>Transaction Fee</label>
+            <div class="fee-options">
+              <label class="fee-option">
+                <input type="radio" name="feeOption" value="economy" data-target="20">
+                <span>Economy (20+ blocks)</span>
+                <span class="fee-estimate" id="feeEconomy">~0.00001 AXE</span>
+              </label>
+              <label class="fee-option">
+                <input type="radio" name="feeOption" value="normal" data-target="6" checked>
+                <span>Normal (6 blocks)</span>
+                <span class="fee-estimate" id="feeNormal">~0.00005 AXE</span>
+              </label>
+              <label class="fee-option">
+                <input type="radio" name="feeOption" value="priority" data-target="2">
+                <span>Priority (2 blocks)</span>
+                <span class="fee-estimate" id="feePriority">~0.0001 AXE</span>
+              </label>
+              <label class="fee-option">
+                <input type="radio" name="feeOption" value="custom">
+                <span>Custom (sat/vB)</span>
+                <input type="number" id="customFee" placeholder="1" min="1" step="1" class="custom-fee-input">
+              </label>
+            </div>
+          </div>
+
+          <!-- Coin Control (Phase 4.2) -->
+          <details class="coin-control-section">
+            <summary>Coin Control (Advanced)</summary>
+            <div class="coin-control-content">
+              <div class="utxo-header">
+                <span>Select inputs to spend:</span>
+                <button type="button" class="btn btn-small" id="refreshUtxos">Refresh</button>
+              </div>
+              <div class="utxo-list" id="utxoList">
+                <p class="empty-state">Click refresh to load UTXOs</p>
+              </div>
+              <div class="coin-control-summary">
+                <span>Selected: <strong id="selectedAmount">0</strong> AXE from <strong id="selectedCount">0</strong> inputs</span>
+              </div>
+            </div>
+          </details>
+
+          <button type="submit" class="btn btn-primary">Send Transaction</button>
+        </form>
+        <div id="sendResult" class="result-box"></div>
+      </div>
+
+      <!-- Receive Page -->
+      <div class="page" id="page-receive">
+        <h2>Receive AXE</h2>
+        <div class="receive-section">
+          <div class="form-group">
+            <label for="addressLabel">Address Label (optional)</label>
+            <input type="text" id="addressLabel" placeholder="e.g., Savings">
+          </div>
+          <div class="form-group">
+            <label for="receiveAmount">Amount (optional, for QR)</label>
+            <input type="number" id="receiveAmount" placeholder="0.00" step="0.00000001" min="0">
+          </div>
+          <button id="generateAddress" class="btn btn-primary">Generate New Address</button>
+          <div class="address-display" id="addressDisplay">
+            <div class="qr-code" id="qrCode"></div>
+            <p class="address-text" id="currentAddress">Click generate to create a new address</p>
+            <button class="btn btn-copy" id="copyAddress" style="display:none;">Copy</button>
+          </div>
+        </div>
+        <div class="addresses-list">
+          <h3>Your Addresses</h3>
+          <div id="addressesList" class="address-items">
+            <p class="empty-state">Loading addresses...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions Page -->
+      <div class="page" id="page-transactions">
+        <h2>Transaction History</h2>
+
+        <!-- Transaction Filtering (Phase 2.2) -->
+        <div class="tx-filters">
+          <div class="filter-row">
+            <div class="filter-group">
+              <label>Type</label>
+              <select id="txFilterType">
+                <option value="all">All</option>
+                <option value="receive">Received</option>
+                <option value="send">Sent</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>From Date</label>
+              <input type="date" id="txFilterFrom" title="Filter transactions from this date">
+            </div>
+            <div class="filter-group">
+              <label>To Date</label>
+              <input type="date" id="txFilterTo" title="Filter transactions up to this date">
+            </div>
+            <div class="filter-group">
+              <label>Search</label>
+              <input type="text" id="txFilterSearch" placeholder="Address or TXID">
+            </div>
+            <button class="btn btn-small" id="clearFilters">Clear</button>
+          </div>
+        </div>
+
+        <div class="tx-full-list" id="txFullList">
+          <p class="empty-state">Loading transactions...</p>
+        </div>
+      </div>
+
+      <!-- Network Page (Phase 1.1) -->
+      <div class="page" id="page-network">
+        <h2>Network</h2>
+
+        <div class="network-stats">
+          <div class="stat-card">
+            <h3>Connections</h3>
+            <p class="stat-value" id="networkConnections">--</p>
+          </div>
+          <div class="stat-card">
+            <h3>Total Received</h3>
+            <p class="stat-value" id="networkRecv">-- MB</p>
+          </div>
+          <div class="stat-card">
+            <h3>Total Sent</h3>
+            <p class="stat-value" id="networkSent">-- MB</p>
+          </div>
+          <div class="stat-card">
+            <h3>Version</h3>
+            <p class="stat-value" id="networkVersion">--</p>
+          </div>
+        </div>
+
+        <div class="peers-section">
+          <div class="section-header">
+            <h3>Connected Peers</h3>
+            <button class="btn btn-small" id="refreshPeers">Refresh</button>
+          </div>
+          <div class="peers-table-wrapper">
+            <table class="peers-table">
+              <thead>
+                <tr>
+                  <th>IP Address</th>
+                  <th>Version</th>
+                  <th>Ping</th>
+                  <th>Recv</th>
+                  <th>Sent</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="peersTableBody">
+                <tr><td colspan="6" class="empty-state">Loading peers...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="banned-section">
+          <h3>Banned Peers</h3>
+          <div id="bannedList" class="banned-list">
+            <p class="empty-state">No banned peers</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contacts Page (Phase 5.1) -->
+      <div class="page" id="page-contacts">
+        <h2>Contacts</h2>
+        <div class="contacts-actions">
+          <button class="btn btn-primary" id="addContactBtn">Add Contact</button>
+          <button class="btn btn-small" id="importContactsBtn">Import</button>
+          <button class="btn btn-small" id="exportContactsBtn">Export</button>
+        </div>
+        <div class="contacts-list" id="contactsList">
+          <p class="empty-state">No contacts yet. Add one above.</p>
+        </div>
+      </div>
+
+      <!-- Tools Page (Phase 1.2 & 7.1) -->
+      <div class="page" id="page-tools">
+        <h2>Tools</h2>
+
+        <!-- Debug Console (Phase 1.2) -->
+        <div class="tool-section">
+          <h3>Debug Console</h3>
+          <div class="console-wrapper">
+            <div class="console-output" id="consoleOutput">
+              <p class="console-welcome">Welcome to the SuperAxeCoin Debug Console.</p>
+              <p class="console-welcome">Type "help" to list available commands.</p>
+            </div>
+            <div class="console-input-wrapper">
+              <span class="console-prompt">&gt;</span>
+              <input type="text" id="consoleInput" placeholder="Enter RPC command..." autocomplete="off">
+              <button class="btn btn-small" id="executeCmd">Execute</button>
+              <button class="btn btn-small" id="clearConsole">Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message Signing (Phase 7.1) -->
+        <div class="tool-section">
+          <h3>Sign Message</h3>
+          <div class="form sign-message-form">
+            <div class="form-group">
+              <label for="signAddress">Address</label>
+              <div class="input-with-button">
+                <input type="text" id="signAddress" placeholder="Enter address to sign with">
+                <button type="button" class="btn btn-small" id="pickSignAddress" title="Pick from wallet">&#128203;</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="signMessageText">Message</label>
+              <textarea id="signMessageText" rows="3" placeholder="Enter message to sign"></textarea>
+            </div>
+            <button type="button" class="btn btn-primary" id="signMessageBtn">Sign Message</button>
+            <div class="form-group signature-output" id="signatureOutput" style="display:none;">
+              <label>Signature</label>
+              <div class="signature-display">
+                <code id="signatureResult"></code>
+                <button class="btn btn-copy" id="copySignature">Copy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tool-section">
+          <h3>Verify Message</h3>
+          <div class="form verify-message-form">
+            <div class="form-group">
+              <label for="verifyAddress">Address</label>
+              <input type="text" id="verifyAddress" placeholder="Enter address that signed">
+            </div>
+            <div class="form-group">
+              <label for="verifyMessage">Message</label>
+              <textarea id="verifyMessage" rows="3" placeholder="Enter original message"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="verifySignature">Signature</label>
+              <input type="text" id="verifySignature" placeholder="Enter signature">
+            </div>
+            <button type="button" class="btn btn-primary" id="verifyMessageBtn">Verify Message</button>
+            <div id="verifyResult" class="result-box"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Page -->
+      <div class="page" id="page-settings">
+        <h2>Settings</h2>
+
+        <!-- Security Section (Phase 3.1) -->
+        <div class="settings-section">
+          <h3>Security</h3>
+          <div class="form">
+            <div class="form-group">
+              <label>Wallet Status</label>
+              <p id="encryptionStatus" class="security-status">Checking...</p>
+            </div>
+            <div class="security-actions">
+              <button type="button" class="btn btn-primary" id="encryptWalletBtn" style="display:none;">Encrypt Wallet</button>
+              <button type="button" class="btn btn-primary" id="changePassphraseBtn" style="display:none;">Change Passphrase</button>
+              <button type="button" class="btn btn-primary" id="unlockWalletBtn" style="display:none;">Unlock Wallet</button>
+              <button type="button" class="btn btn-secondary" id="lockWalletBtn" style="display:none;">Lock Wallet</button>
+            </div>
+            <p id="unlockTimer" class="unlock-timer" style="display:none;"></p>
+          </div>
+        </div>
+
+        <!-- Backup Section (Phase 3.2) -->
+        <div class="settings-section">
+          <h3>Backup &amp; Restore</h3>
+          <div class="form">
+            <p class="section-desc">Create a backup of your wallet or import an existing wallet file.</p>
+            <div class="backup-actions">
+              <button type="button" class="btn btn-primary" id="backupWalletBtn">Export Wallet</button>
+              <button type="button" class="btn btn-secondary" id="importWalletBtn">Import Wallet File</button>
+            </div>
+            <div id="backupResult" class="result-box"></div>
+          </div>
+        </div>
+
+        <!-- RPC Connection -->
+        <div class="settings-section">
+          <h3>RPC Connection</h3>
+          <form id="settingsForm" class="form">
+            <div class="form-group">
+              <label for="rpcHost">Host</label>
+              <input type="text" id="rpcHost" value="127.0.0.1">
+            </div>
+            <div class="form-group">
+              <label for="rpcPort">Port</label>
+              <input type="number" id="rpcPort" value="9998">
+            </div>
+            <div class="form-group">
+              <label for="rpcUser">Username</label>
+              <input type="text" id="rpcUser" value="superaxecoinrpc">
+            </div>
+            <div class="form-group">
+              <label for="rpcPass">Password</label>
+              <input type="password" id="rpcPass" placeholder="Enter RPC password">
+            </div>
+            <button type="submit" class="btn btn-primary">Save & Connect</button>
+          </form>
+          <div id="settingsResult" class="result-box"></div>
+        </div>
+
+        <div class="settings-section">
+          <h3>Debugging</h3>
+          <div class="form-group">
+            <label>Log File Location</label>
+            <p class="log-path" id="logPath" style="font-family: monospace; font-size: 0.85rem; color: var(--text-secondary);">Loading...</p>
+          </div>
+          <button type="button" id="openLogBtn" class="btn btn-secondary">Open Log File</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Transaction Details Modal (Phase 2.1) -->
+  <div class="modal-overlay" id="txModalOverlay">
+    <div class="modal" id="txModal">
+      <div class="modal-header">
+        <h3>Transaction Details</h3>
+        <button class="modal-close" id="closeTxModal">&times;</button>
+      </div>
+      <div class="modal-body" id="txModalBody">
+        <!-- Content populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Edit Modal -->
+  <div class="modal-overlay" id="contactModalOverlay">
+    <div class="modal" id="contactModal">
+      <div class="modal-header">
+        <h3 id="contactModalTitle">Add Contact</h3>
+        <button class="modal-close" id="closeContactModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="contactForm" class="form">
+          <input type="hidden" id="contactId">
+          <div class="form-group">
+            <label for="contactLabel">Label</label>
+            <input type="text" id="contactLabel" placeholder="e.g., Alice" required>
+          </div>
+          <div class="form-group">
+            <label for="contactAddress">Address</label>
+            <input type="text" id="contactAddress" placeholder="SuperAxeCoin address" required>
+          </div>
+          <div class="form-group">
+            <label for="contactNotes">Notes (optional)</label>
+            <textarea id="contactNotes" rows="2" placeholder="Additional notes"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Contact</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Passphrase Modal -->
+  <div class="modal-overlay" id="passphraseModalOverlay">
+    <div class="modal" id="passphraseModal">
+      <div class="modal-header">
+        <h3 id="passphraseModalTitle">Enter Passphrase</h3>
+        <button class="modal-close" id="closePassphraseModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="passphraseForm" class="form">
+          <input type="hidden" id="passphraseAction">
+          <div class="form-group" id="oldPassGroup" style="display:none;">
+            <label for="oldPassphrase">Current Passphrase</label>
+            <input type="password" id="oldPassphrase" placeholder="Enter current passphrase">
+          </div>
+          <div class="form-group">
+            <label for="passphrase">Passphrase</label>
+            <input type="password" id="passphrase" placeholder="Enter passphrase" required>
+          </div>
+          <div class="form-group" id="confirmPassGroup" style="display:none;">
+            <label for="confirmPassphrase">Confirm Passphrase</label>
+            <input type="password" id="confirmPassphrase" placeholder="Confirm passphrase">
+          </div>
+          <div class="form-group" id="unlockTimeGroup" style="display:none;">
+            <label for="unlockTime">Unlock Duration (seconds)</label>
+            <input type="number" id="unlockTime" value="300" min="1" max="9999">
+          </div>
+          <p class="passphrase-warning" id="passphraseWarning" style="display:none;">
+            Warning: If you encrypt your wallet and forget your passphrase, you will permanently lose access to your funds!
+          </p>
+          <button type="submit" class="btn btn-primary" id="passphraseSubmitBtn">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Wallet Modal -->
+  <div class="modal-overlay" id="walletModalOverlay">
+    <div class="modal" id="walletModal">
+      <div class="modal-header">
+        <h3>Create New Wallet</h3>
+        <button class="modal-close" id="closeWalletModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="walletForm" class="form">
+          <div class="form-group">
+            <label for="newWalletName">Wallet Name</label>
+            <input type="text" id="newWalletName" placeholder="e.g., savings" pattern="[a-zA-Z0-9_-]+" required>
+            <span class="validation-msg">Only letters, numbers, underscore, and hyphen allowed</span>
+          </div>
+          <button type="submit" class="btn btn-primary">Create Wallet</button>
+        </form>
+        <div id="walletResult" class="result-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Picker Modal -->
+  <div class="modal-overlay" id="contactPickerOverlay">
+    <div class="modal" id="contactPickerModal">
+      <div class="modal-header">
+        <h3>Select Contact</h3>
+        <button class="modal-close" id="closeContactPicker">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="contactPickerList" class="contact-picker-list">
+          <p class="empty-state">Loading contacts...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Address Picker Modal -->
+  <div class="modal-overlay" id="addressPickerOverlay">
+    <div class="modal" id="addressPickerModal">
+      <div class="modal-header">
+        <h3>Select Address</h3>
+        <button class="modal-close" id="closeAddressPicker">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="addressPickerList" class="address-picker-list">
+          <p class="empty-state">Loading addresses...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wallet Transition Overlay -->
+  <div class="wallet-transition-overlay" id="walletTransitionOverlay">
+    <div class="wallet-transition-backdrop"></div>
+    <div class="wallet-transition-panel">
+      <div class="wallet-transition-header">
+        <div class="wallet-transition-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <path d="M22 10H18C16.8954 10 16 10.8954 16 12V12C16 13.1046 16.8954 14 18 14H22"/>
+            <circle cx="18" cy="12" r="1"/>
+          </svg>
+        </div>
+        <h2 class="wallet-transition-title" id="walletTransitionTitle">Switching Wallet</h2>
+        <p class="wallet-transition-subtitle" id="walletTransitionSubtitle">Please wait while we prepare your wallet</p>
+      </div>
+
+      <div class="wallet-transition-progress">
+        <div class="wallet-transition-steps">
+          <div class="wallet-step" id="walletStep1">
+            <div class="wallet-step-indicator">
+              <div class="wallet-step-check">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div class="wallet-step-spinner"></div>
+              <div class="wallet-step-dot"></div>
+            </div>
+            <div class="wallet-step-content">
+              <span class="wallet-step-label">Unloading current wallet</span>
+              <span class="wallet-step-status"></span>
+            </div>
+          </div>
+
+          <div class="wallet-step" id="walletStep2">
+            <div class="wallet-step-indicator">
+              <div class="wallet-step-check">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div class="wallet-step-spinner"></div>
+              <div class="wallet-step-dot"></div>
+            </div>
+            <div class="wallet-step-content">
+              <span class="wallet-step-label">Loading wallet data</span>
+              <span class="wallet-step-status"></span>
+            </div>
+          </div>
+
+          <div class="wallet-step" id="walletStep3">
+            <div class="wallet-step-indicator">
+              <div class="wallet-step-check">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div class="wallet-step-spinner"></div>
+              <div class="wallet-step-dot"></div>
+            </div>
+            <div class="wallet-step-content">
+              <span class="wallet-step-label">Fetching balance</span>
+              <span class="wallet-step-status"></span>
+            </div>
+          </div>
+
+          <div class="wallet-step" id="walletStep4">
+            <div class="wallet-step-indicator">
+              <div class="wallet-step-check">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div class="wallet-step-spinner"></div>
+              <div class="wallet-step-dot"></div>
+            </div>
+            <div class="wallet-step-content">
+              <span class="wallet-step-label">Ready</span>
+              <span class="wallet-step-status"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wallet-transition-bar">
+          <div class="wallet-transition-bar-fill" id="walletTransitionBarFill"></div>
+        </div>
+      </div>
+
+      <div class="wallet-transition-wallet-info" id="walletTransitionInfo">
+        <div class="wallet-info-label">WALLET</div>
+        <div class="wallet-info-name" id="walletTransitionName">--</div>
+      </div>
+
+      <div class="wallet-transition-error" id="walletTransitionError" style="display: none;">
+        <div class="wallet-error-icon">!</div>
+        <p class="wallet-error-message" id="walletTransitionErrorMsg"></p>
+        <button class="btn btn-primary" id="walletTransitionRetry">Retry</button>
+        <button class="btn btn-secondary" id="walletTransitionDismiss">Dismiss</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
