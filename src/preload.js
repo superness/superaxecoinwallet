@@ -122,6 +122,7 @@ contextBridge.exposeInMainWorld('api', {
   loadWallet: (walletName) => ipcRenderer.invoke('rpc:loadwallet', walletName),
   unloadWallet: (walletName) => ipcRenderer.invoke('rpc:unloadwallet', walletName),
   createWallet: (walletName) => ipcRenderer.invoke('rpc:createwallet', walletName),
+  setActiveWallet: (walletName) => ipcRenderer.invoke('wallet:setactive', walletName),
 
   // ============================================================================
   // Phase 7.1: Message Signing

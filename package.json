@@ -12,7 +12,10 @@
     "build:linux": "electron-builder --linux",
     "build:all": "electron-builder -mwl"
   },
-  "author": "SuperAxeCoin Developers",
+  "author": {
+    "name": "SuperAxeCoin Developers",
+    "email": "support@superaxecoin.com"
+  },
   "license": "MIT",
   "devDependencies": {
     "electron": "^28.0.0",
@@ -32,25 +35,20 @@
       "src/**/*",
       "assets/**/*"
     ],
-    "extraResources": [
-      {
-        "from": "daemon",
-        "to": "daemon",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ],
     "asar": true,
-    "asarUnpack": [
-      "daemon/**/*"
-    ],
     "win": {
       "target": [
         "nsis",
         "portable"
       ],
-      "icon": "assets/icon.png"
+      "icon": "assets/icon.png",
+      "extraResources": [
+        {
+          "from": "daemon/win",
+          "to": "daemon",
+          "filter": ["**/*"]
+        }
+      ]
     },
     "mac": {
       "target": [
@@ -58,7 +56,14 @@
         "zip"
       ],
       "icon": "assets/icon.icns",
-      "category": "public.app-category.finance"
+      "category": "public.app-category.finance",
+      "extraResources": [
+        {
+          "from": "daemon/mac",
+          "to": "daemon",
+          "filter": ["**/*"]
+        }
+      ]
     },
     "linux": {
       "target": [
@@ -66,7 +71,14 @@
         "deb"
       ],
       "icon": "assets/icon.png",
-      "category": "Finance"
+      "category": "Finance",
+      "extraResources": [
+        {
+          "from": "daemon/linux",
+          "to": "daemon",
+          "filter": ["**/*"]
+        }
+      ]
     }
   }
 }

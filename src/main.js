@@ -836,6 +836,13 @@ ipcMain.handle('rpc:createwallet', async (event, walletName) => {
   }
 });
 
+// Set active wallet context (for when wallet is already loaded)
+ipcMain.handle('wallet:setactive', async (event, walletName) => {
+  logger.walletAction('Setting active wallet', { name: walletName });
+  rpcClient.setWallet(walletName);
+  return { success: true };
+});
+
 // ============================================================================
 // Phase 7.1: Message Signing - IPC Handlers
 // ============================================================================

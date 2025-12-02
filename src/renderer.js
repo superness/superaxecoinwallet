@@ -1528,6 +1528,10 @@ walletSelect.addEventListener('change', async () => {
         if (result.error) {
           throw new Error(result.error);
         }
+      } else {
+        // Wallet is already loaded, but we need to set it as the active context
+        // for RPC calls (fixes issue where balance shows wrong wallet)
+        await window.api.setActiveWallet(walletName);
       }
 
       await sleep(400);

@@ -1,8 +1,61 @@
 # SuperAxeCoin Wallet
 
-An Electron-based GUI wallet for SuperAxeCoin.
+A cross-platform GUI wallet for SuperAxeCoin built with Electron.
 
-## Setup
+## Download
+
+Download the latest release for your platform:
+
+- **Windows**: `SuperAxeCoin Wallet Setup 1.0.0.exe` (installer) or `SuperAxeCoin Wallet 1.0.0.exe` (portable)
+- **Linux**: `SuperAxeCoin Wallet-1.0.0.AppImage` or `superaxecoin-wallet_1.0.0_amd64.deb`
+
+See [Releases](https://github.com/superaxecoin/superaxecoin-wallet/releases) for downloads.
+
+## Features
+
+- Dashboard with balance, block height, and sync status
+- Send and receive SAXE
+- Transaction history with filtering
+- Network/peers monitoring
+- Debug console for RPC commands
+- Wallet encryption and backup
+- Multi-wallet support
+- Contact address book
+- Message signing and verification
+
+## Updating the Daemon
+
+The wallet comes bundled with `superaxecoind` and `superaxecoin-cli`. If you need to update to a newer version of the daemon (e.g., for network upgrades or bug fixes), follow these steps:
+
+### Installed Version (Windows Installer / Linux .deb)
+
+1. **Find the daemon folder**:
+   - **Windows**: `C:\Users\<YourUser>\AppData\Local\Programs\superaxecoin-wallet\resources\daemon\`
+   - **Linux (.deb)**: `/opt/SuperAxeCoin Wallet/resources/daemon/`
+
+2. **Download new binaries** from [SuperAxeCoin Releases](https://github.com/superaxecoin/superaxecoin/releases)
+
+3. **Close the wallet** completely
+
+4. **Replace the files**:
+   - Windows: Replace `superaxecoind.exe` and `superaxecoin-cli.exe`
+   - Linux: Replace `superaxecoind` and `superaxecoin-cli`
+
+5. **Restart the wallet**
+
+### Portable Version (Windows .exe / Linux AppImage)
+
+For portable versions, the daemon is embedded and cannot be easily updated. Download the latest wallet release which includes updated daemon binaries.
+
+### Verifying the Update
+
+After updating, you can verify the daemon version:
+1. Open the wallet
+2. Go to **Tools** > **Debug Console**
+3. Type `getnetworkinfo` and press Enter
+4. Check the `version` and `subversion` fields
+
+## Development Setup
 
 ### 1. Install dependencies
 
@@ -10,49 +63,38 @@ An Electron-based GUI wallet for SuperAxeCoin.
 npm install
 ```
 
-### 2. Get the daemon binaries
+### 2. Daemon binaries
 
-The wallet requires `superaxecoind` (and optionally `superaxecoin-cli`) to function. You have two options:
-
-**Option A: Download from releases**
-
-Download the latest release from [SuperAxeCoin GitHub Releases](https://github.com/parnurzeal/superaxecoin/releases) and extract the binaries.
-
-**Option B: Build from source**
-
-Clone and build the SuperAxeCoin core:
-
-```bash
-git clone https://github.com/parnurzeal/superaxecoin.git
-cd superaxecoin
-# Follow build instructions in the superaxecoin repo
-```
-
-### 3. Place binaries in daemon folder
-
-Create a `daemon/` folder in this project and copy the binaries:
+The daemon binaries are organized by platform:
 
 ```
 daemon/
-  superaxecoind.exe      (required)
-  superaxecoin-cli.exe   (optional)
+├── win/
+│   ├── superaxecoind.exe
+│   └── superaxecoin-cli.exe
+└── linux/
+    ├── superaxecoind
+    └── superaxecoin-cli
 ```
 
-On Linux/Mac, the files would be `superaxecoind` and `superaxecoin-cli` (no .exe extension).
+Download from [SuperAxeCoin Releases](https://github.com/superaxecoin/superaxecoin/releases) or build from source.
 
-## Development
+### 3. Run in development
 
 ```bash
-npm start
+npm start        # Normal mode
+npm run dev      # With DevTools open
 ```
 
-## Build
+## Building
 
 ```bash
-npm run build
+npm run build:win    # Windows (nsis + portable)
+npm run build:linux  # Linux (AppImage + deb)
+npm run build:mac    # macOS (dmg + zip)
 ```
 
-This creates a packaged application in `dist/` with the daemon binaries bundled in `resources/daemon/`.
+Output goes to `dist/` with platform-specific daemon binaries bundled.
 
 ## License
 
