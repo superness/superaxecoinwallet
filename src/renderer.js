@@ -1944,6 +1944,22 @@ document.getElementById('openLogBtn').addEventListener('click', async () => {
 updateDaemonStatus('starting');
 
 // ============================================================================
+// Custom Title Bar Window Controls
+// ============================================================================
+
+document.getElementById('minimizeBtn').addEventListener('click', () => {
+  window.api.windowMinimize();
+});
+
+document.getElementById('maximizeBtn').addEventListener('click', () => {
+  window.api.windowMaximize();
+});
+
+document.getElementById('closeBtn').addEventListener('click', () => {
+  window.api.windowClose();
+});
+
+// ============================================================================
 // Tech Brutal Particle System - Minimal Ember Effect
 // ============================================================================
 

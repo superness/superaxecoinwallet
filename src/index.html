@@ -11,6 +11,36 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Custom Title Bar -->
+  <div class="title-bar" id="titleBar">
+    <div class="title-bar-drag">
+      <div class="title-bar-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <span class="title-bar-text">SuperAxeCoin Wallet</span>
+    </div>
+    <div class="title-bar-controls">
+      <button class="title-bar-btn" id="minimizeBtn" title="Minimize">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+      <button class="title-bar-btn" id="maximizeBtn" title="Maximize">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="5" y="5" width="14" height="14" rx="1"/>
+        </svg>
+      </button>
+      <button class="title-bar-btn title-bar-close" id="closeBtn" title="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="6" y1="6" x2="18" y2="18"/>
+          <line x1="6" y1="18" x2="18" y2="6"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
   <!-- Particle container hidden in new design -->
   <div id="particles-container"></div>
 

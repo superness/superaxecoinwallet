@@ -31,6 +31,7 @@ function createWindow() {
     height: 900,
     minWidth: 900,
     minHeight: 700,
+    frame: false,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -39,8 +40,7 @@ function createWindow() {
     icon: process.platform === 'win32'
       ? path.join(__dirname, '../assets/icon.ico')
       : path.join(__dirname, '../assets/icon.png'),
-    titleBarStyle: 'default',
-    backgroundColor: '#f8fafc'
+    backgroundColor: '#0a0a0a'
   });
 
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
@@ -61,6 +61,29 @@ function sendToRenderer(channel, data) {
     mainWindow.webContents.send(channel, data);
   }
 }
+
+// Window control IPC handlers
+ipcMain.handle('window:minimize', () => {
+  if (mainWindow) mainWindow.minimize();
+});
+
+ipcMain.handle('window:maximize', () => {
+  if (mainWindow) {
+    if (mainWindow.isMaximized()) {
+      mainWindow.unmaximize();
+    } else {
+      mainWindow.maximize();
+    }
+  }
+});
+
+ipcMain.handle('window:close', () => {
+  if (mainWindow) mainWindow.close();
+});
+
+ipcMain.handle('window:isMaximized', () => {
+  return mainWindow ? mainWindow.isMaximized() : false;
+});
 
 async function ensureWalletLoaded() {
   const DEFAULT_WALLET = 'default_wallet';
