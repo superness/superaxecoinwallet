@@ -9,7 +9,7 @@ Download the latest release for your platform:
 - **Windows**: `SuperAxeCoin Wallet Setup 1.0.0.exe` (installer) or `SuperAxeCoin Wallet 1.0.0.exe` (portable)
 - **Linux**: `SuperAxeCoin Wallet-1.0.0.AppImage` or `superaxecoin-wallet_1.0.0_amd64.deb`
 
-See [Releases](https://github.com/superaxecoin/superaxecoin-wallet/releases) for downloads.
+See [Releases](https://github.com/superness/superaxecoinwallet/releases) for downloads.
 
 ## Features
 
@@ -33,7 +33,7 @@ The wallet comes bundled with `superaxecoind` and `superaxecoin-cli`. If you nee
    - **Windows**: `C:\Users\<YourUser>\AppData\Local\Programs\superaxecoin-wallet\resources\daemon\`
    - **Linux (.deb)**: `/opt/SuperAxeCoin Wallet/resources/daemon/`
 
-2. **Download new binaries** from [SuperAxeCoin Releases](https://github.com/superaxecoin/superaxecoin/releases)
+2. **Download new binaries** from [SuperAxeCoin Releases](https://github.com/superness/superaxecoin/releases)
 
 3. **Close the wallet** completely
 
@@ -77,7 +77,7 @@ daemon/
     └── superaxecoin-cli
 ```
 
-Download from [SuperAxeCoin Releases](https://github.com/superaxecoin/superaxecoin/releases) or build from source.
+Download from [SuperAxeCoin Releases](https://github.com/superness/superaxecoin/releases) or build from source.
 
 ### 3. Run in development
 
