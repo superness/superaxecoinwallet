@@ -8,6 +8,8 @@ let selectedUtxos = [];
 let consoleHistory = [];
 let consoleHistoryIndex = -1;
 let unlockEndTime = null;
+let lastKnownBalance = null;
+let lastKnownTxIds = new Set();
 
 // ============================================================================
 // Daemon Status Handling
@@ -129,7 +131,16 @@ async function refreshDashboard() {
     ]);
 
     if (!balance.error) {
-      document.getElementById('balance').textContent = `${parseFloat(balance).toFixed(8)} AXE`;
+      const newBalance = parseFloat(balance);
+      const balanceEl = document.getElementById('balance');
+      balanceEl.textContent = `${newBalance.toFixed(8)} AXE`;
+
+      // Check for balance increase (received coins)
+      if (lastKnownBalance !== null && newBalance > lastKnownBalance) {
+        const increase = newBalance - lastKnownBalance;
+        triggerBalanceGlimmer(increase);
+      }
+      lastKnownBalance = newBalance;
     }
 
     if (!blockchainInfo.error) {
@@ -146,7 +157,7 @@ async function refreshDashboard() {
       document.getElementById('connections').textContent = networkInfo.connections;
     }
 
-    loadRecentTransactions();
+    await loadRecentTransactions();
   } catch (error) {
     console.error('Dashboard refresh error:', error);
     updateConnectionStatus(false);
@@ -156,7 +167,7 @@ async function refreshDashboard() {
 async function loadRecentTransactions() {
   const txList = document.getElementById('recentTxList');
   try {
-    const transactions = await window.api.listTransactions(5);
+    const transactions = await window.api.listTransactions(10);
 
     if (transactions.error) {
       txList.innerHTML = `<p class="empty-state">${transactions.error}</p>`;
@@ -168,7 +179,26 @@ async function loadRecentTransactions() {
       return;
     }
 
-    txList.innerHTML = transactions.reverse().map(tx => `
+    // Check for new incoming transactions
+    const currentTxIds = new Set(transactions.map(tx => tx.txid));
+
+    // Only check for new transactions if we have previous state
+    if (lastKnownTxIds.size > 0) {
+      for (const tx of transactions) {
+        // New transaction that we haven't seen before and is a receive
+        if (!lastKnownTxIds.has(tx.txid) && tx.amount > 0 && tx.category === 'receive') {
+          showTransactionToast('receive', tx.amount, tx.address);
+        }
+      }
+    }
+
+    // Update known transaction IDs
+    lastKnownTxIds = currentTxIds;
+
+    // Display only 5 most recent
+    const recentTx = transactions.slice(-5).reverse();
+
+    txList.innerHTML = recentTx.map(tx => `
       <div class="tx-item" data-txid="${tx.txid}">
         <div class="tx-info">
           <div class="tx-address">${tx.address || 'Unknown'}</div>
@@ -1736,6 +1766,97 @@ settingsForm.addEventListener('submit', async (e) => {
 function showResult(element, message, type) {
   element.textContent = message;
   element.className = `result-box ${type}`;
+}
+
+// ============================================================================
+// Toast Notifications & Balance Glimmer
+// ============================================================================
+
+function showTransactionToast(type, amount, address) {
+  const container = document.getElementById('toastContainer');
+
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `
+    <button class="toast-close">&times;</button>
+    <div class="toast-header">
+      <div class="toast-icon">${type === 'receive' ? '&#8595;' : '&#8593;'}</div>
+      <div class="toast-title">${type === 'receive' ? 'Received' : 'Sent'}</div>
+    </div>
+    <div class="toast-body">
+      <div class="toast-amount">${type === 'receive' ? '+' : '-'}${parseFloat(amount).toFixed(8)} AXE</div>
+      ${address ? `<div class="toast-address">${address}</div>` : ''}
+    </div>
+  `;
+
+  container.appendChild(toast);
+
+  // Trigger show animation
+  requestAnimationFrame(() => {
+    toast.classList.add('show');
+  });
+
+  // Close button handler
+  toast.querySelector('.toast-close').addEventListener('click', () => {
+    hideToast(toast);
+  });
+
+  // Auto-hide after 6 seconds
+  setTimeout(() => {
+    hideToast(toast);
+  }, 6000);
+}
+
+function hideToast(toast) {
+  toast.classList.remove('show');
+  toast.classList.add('hiding');
+  setTimeout(() => {
+    if (toast.parentNode) {
+      toast.parentNode.removeChild(toast);
+    }
+  }, 400);
+}
+
+function triggerBalanceGlimmer(increaseAmount) {
+  const balanceEl = document.getElementById('balance');
+  const statCard = balanceEl.closest('.stat-card');
+
+  // Add glimmer class to balance
+  balanceEl.classList.add('balance-display', 'glimmer');
+
+  // Add highlight to stat card
+  if (statCard) {
+    statCard.classList.add('highlight-receive');
+  }
+
+  // Show floating +amount indicator
+  let changeEl = balanceEl.parentElement.querySelector('.balance-change');
+  if (!changeEl) {
+    changeEl = document.createElement('span');
+    changeEl.className = 'balance-change';
+    balanceEl.parentElement.style.position = 'relative';
+    balanceEl.parentElement.appendChild(changeEl);
+  }
+
+  changeEl.textContent = `+${increaseAmount.toFixed(8)} AXE`;
+  changeEl.classList.remove('show');
+
+  // Trigger animation
+  requestAnimationFrame(() => {
+    changeEl.classList.add('show');
+  });
+
+  // Clean up after animation
+  setTimeout(() => {
+    balanceEl.classList.remove('glimmer');
+    if (statCard) {
+      statCard.classList.remove('highlight-receive');
+    }
+  }, 1000);
+
+  setTimeout(() => {
+    changeEl.classList.remove('show');
+  }, 2000);
 }
 
 function updateConnectionStatus(connected, syncing = false) {
